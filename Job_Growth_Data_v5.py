@@ -7,10 +7,22 @@ from sqlalchemy import create_engine
 import subprocess
 import urllib
 import MySQLdb
-#import pymysql
 import re
 
+
+############################################################################################################################
+# The purpose of this document...
+#
+#
+#
+#
+#
+#
+
 engine = create_engine("mysql+mysqldb://job_growthmaster:jobgrowthpass@job-growth.cotzely14ram.us-west-2.rds.amazonaws.com/job_growth2?charset=utf8&use_unicode=0")
+
+
+
 
 files = ['sm/sm.data.1.AllData',
          'ce/ce.data.0.AllCESSeries',
@@ -47,13 +59,25 @@ data_hostname = "http://download.bls.gov/pub/time.series/"
 current_filesystem = datadir
 
 
-# for filename in files: # Loop through the files in files dictonary
-#     filename_extension = filename[3:] + ".txt" # Filename munge
-#     data_location = data_hostname + "" + filename # file name location
-#     full_filepath = current_filesystem + "/" + filename_extension # full location
-#     print "downloading from: " + data_location
-#     urllib.urlretrieve(data_location, full_filepath) # grab that shit
-#     print "download path: " + full_filepath
+
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
+
+
+
+for filename in files: # Loop through the files in files dictonary
+    filename_extension = filename[3:] + ".txt" # Filename munge
+    data_location = data_hostname + "" + filename # file name location
+    full_filepath = current_filesystem + "/" + filename_extension # full location
+    print "downloading from: " + data_location
+    urllib.urlretrieve(data_location, full_filepath) # grab that shit
+    print "download path: " + full_filepath
 
 print "Finished Downloading Data"
 
@@ -70,8 +94,17 @@ def strip(text):
 year_to_date = 5
 
 
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
 
 try:
+
     sm_state = pd.read_sql_query('SELECT * FROM sm_state', engine)
     sm_state['state_name'].replace('\\r','')
 
@@ -171,6 +204,14 @@ try:
     sm_table_final_v2['Month'] = sm_table_final_v2['Month'].apply(lambda x: re.sub('M', '',x))
 
 
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
 
     #ce files
     ce_supersector = pd.read_sql_query('SELECT * FROM ce_supersector', engine)
@@ -273,6 +314,15 @@ try:
     # ################################################################################################
     # # National percentage changes
 
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
+
     group_nat = ce_table_final_v3.groupby(['supersector_name','industry_name','year','Month'])
     sums_by_period = group_nat['value'].sum()
     sum_nat_mom = pd.DataFrame(sums_by_period).reset_index()
@@ -332,6 +382,15 @@ try:
 
     # Year to date percentage changes are going to be the percentage change of the current amount of month's we have experienced
 
+
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
     sums_states_mom = sm_table_final_v3.query('area_name == "Statewide"')
     group_g2 = sums_states_mom.groupby(['state_name','supersector_name','industry_name','year','Month'])
     sums_by_state = group_g2['value'].sum()
@@ -373,6 +432,14 @@ try:
 
     print("************************  Created Final Tables: sums_states")
 
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
 
 
     def msas():
@@ -428,6 +495,15 @@ try:
         # # The following code munges the MSA over & Starting at the sums dataframe it moves forward, selects the list of MSA's (total
         # # Non farm over 1000) and then filters on those MSA's and applies the functionality we have been using for pct changes and Rankings
 
+
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
         sums_msa_over_mom = sm_table_final_v3.query('area_name != "Statewide" and (industry_name == "Total Nonfarm" and value > 1000)')
         msas_over = list(sums_msa_over_mom['area_name'].unique())
         sums_msa_over_mom = sm_table_final_v3[sm_table_final_v3['area_name'].isin(msas_over)]
@@ -477,6 +553,15 @@ try:
 
 
     def msas_under():
+
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
         sums_msa_under_mom = sm_table_final_v3.query('area_name != "Statewide" and (industry_name == "Total Nonfarm" and value < 1000)')
         group_msas = sums_msa_under_mom.groupby(['area_name','supersector_name','industry_name','year','Month'])
         sums_msa_under_mom = group_msas['value'].sum()
@@ -521,7 +606,14 @@ try:
         print("************************  Created Final Tables: sums_msa_under")
 
 
-
+############################################################################################################################
+# The purpose of this section...
+#
+#
+#
+#
+#
+#
 
 
 # # ###########################################################################################
